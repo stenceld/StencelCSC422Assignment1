@@ -1,4 +1,20 @@
-/* Pets class so user can create objects and be
+/* I certify that the HTML file I am submitting is all my own work. 
+None of it is copied from any source or any person.
+Signed:Dominic Stencel  Date:1/18/2026
+Author: Dominic Stencel
+
+Date: 1/18/2026
+Class: CSC422 - Software Engineering
+Project: Assignment 1 
+File Name: StencelCSC422Assignment1\pets.java
+Sources: 
+Used for syntax help since I haven't used java in awhile
+https://www.w3schools.com/java/java_syntax.asp
+ */
+
+
+/*
+ Pets class so user can create objects and
 to perform CRUD features on them
 */
 

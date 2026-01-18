@@ -1,3 +1,17 @@
+/* I certify that the HTML file I am submitting is all my own work. 
+None of it is copied from any source or any person.
+Signed:Dominic Stencel  Date:1/18/2026
+Author: Dominic Stencel
+
+Date: 1/18/2026
+Class: CSC422 - Software Engineering
+Project: Assignment 1 
+File Name: StencelCSC422Assignment1\database.java
+Sources: 
+Used for syntax help since I haven't used java in awhile
+https://www.w3schools.com/java/java_syntax.asp
+ */
+
 // Imports
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -5,6 +19,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class database {
+    // Static variable to track the next available ID
+    static int nextID = 6;
+
     public static void main(String[] args) {
         // Creating Scanner object
         Scanner scanner = new Scanner(System.in);
@@ -16,9 +33,6 @@ public class database {
         // Each key (id) will have a value of (Arraylist [name, age])
         // Want Array list to be name then age, so we know 0 = name & 1 = age
         HashMap<Integer, ArrayList<String>> dataBase = new HashMap<>();
-
-        // Variable to store the running total for ID
-        int nextID = 6;
 
         // Test inputs for the database 
         dataBase.put(1, new ArrayList<>(Arrays.asList("Max", "3")));
@@ -35,6 +49,8 @@ public class database {
             System.out.println("");
             System.out.println("1) View all pets");
             System.out.println("2) Add more pets");
+            System.out.println("3) Update an existing pet");
+            System.out.println("4) Delete an existing pet");
             System.out.println("5) Search pets by name");
             System.out.println("6) Search pets by age");
             System.out.println("7) Exit Program");
@@ -47,7 +63,11 @@ public class database {
             switch(option) {
                 case 1 -> displayDataBase(dataBase);
                 
-                case 2 -> addPet(dataBase, nextID, scanner);
+                case 2 -> addPet(dataBase, scanner);
+
+                case 3 -> updatePet(dataBase, scanner);
+
+                case 4 -> deletePet(dataBase, scanner);
 
                 case 5 -> searchPetsByName(dataBase, scanner);
 
@@ -93,32 +113,44 @@ public class database {
     /////////////////////////
     //      addPet()       //
     /////////////////////////
-     public static void addPet(HashMap<Integer, ArrayList<String>> dataBase, Integer nextID, Scanner scanner) {
+    public static void addPet(HashMap<Integer, ArrayList<String>> dataBase,
+         Scanner scanner) {
 
-        // Asking for users input on pets name
-        System.out.print("Pet name: ");
-        String petName = scanner.next();
+        System.out.println("Enter pet information (name and age on each line).");
+        System.out.println("Type 'done' when finished.");
+        
+        // Loop to add multiple pets
+        String petName = "";
+        while (!petName.equalsIgnoreCase("done")) {
+            // Asking for users input on pets name
+            System.out.print("Add pet (name, age): ");
+            petName = scanner.next();
+            String petAge = scanner.next();
+            
+            // Check if user typed done to exit loop
+            if (petName.equalsIgnoreCase("done")) {
+                break;
+            }
 
-        // Asking for users input on pets age
-        System.out.print("Pet age: ");
-        String petAge = scanner.next();
-
-        // Adding pet to database
-        dataBase.put(nextID, new ArrayList<>(Arrays.asList(petName, petAge)));
-
-        // increment next id
-        nextID ++;
-
-        // Confirmation message and footer
-        System.out.println("Pet added successfully!");
+            // Adding pet to database
+            dataBase.put(nextID, new ArrayList<>(Arrays.asList(petName, petAge)));
+            
+            System.out.println("Pet added successfully!");
+            
+            // increment next id
+            nextID++;
+        }
+        
         System.out.println("=====================");
         System.out.println("");
-     }
+    }
 
     /////////////////////////
     //  searchPetsByName() //
     /////////////////////////
-    public static void searchPetsByName(HashMap<Integer, ArrayList<String>> dataBase, Scanner scanner) {
+    public static void searchPetsByName(HashMap<Integer, ArrayList<String>> dataBase,
+         Scanner scanner) {
+
         // Asking for users input on pets name to search
         System.out.print("Enter pet name to search: ");
         String searchName = scanner.next();
@@ -150,7 +182,9 @@ public class database {
     /////////////////////////
     //  searchPetsByAge()  //
     /////////////////////////
-    public static void searchPetsByAge(HashMap<Integer, ArrayList<String>> dataBase, Scanner scanner) {
+    public static void searchPetsByAge(HashMap<Integer, ArrayList<String>> dataBase,
+         Scanner scanner) {
+
         // Asking for users input on pets age to search
         System.out.print("Enter pet age to search: ");
         String searchAge = scanner.next();
@@ -177,5 +211,52 @@ public class database {
 
         // Displaying footer
         System.out.println("+-----------------------------+"); 
+    }
+
+    /////////////////////////
+    //     updatePet()     //
+    /////////////////////////
+    public static void updatePet(HashMap<Integer, ArrayList<String>> dataBase,
+         Scanner scanner) {
+
+        // Prompt user for pet ID to update
+        System.out.print("Enter pet ID to update: ");
+        int petID = scanner.nextInt();
+        
+        // Store existing pet info
+        ArrayList<String> petInfo = dataBase.get(petID);
+
+        // Prompt user for new name and age
+        System.out.print("Enter new pet name and age: ");
+        String newName = scanner.next();
+        String newAge = scanner.next();
+
+        // Update the pet in the database
+        dataBase.put(petID, new ArrayList<>(Arrays.asList(newName, newAge)));
+
+        // Confirmation message
+        System.out.println(petInfo.get(0) + " has been updated to "
+         + newName + ", age " + newAge + ".");
+        
+        // Footer
+        System.out.println("=====================");
+    }
+
+    /////////////////////////
+    //     deletePet()     //
+    /////////////////////////
+    public static void deletePet(HashMap<Integer, ArrayList<String>> dataBase,
+         Scanner scanner) {
+        
+        // Prompt user for pet ID to delete
+        System.out.print("Enter pet ID to delete: ");
+        int petID = scanner.nextInt();
+
+        // Remove the pet from the database
+        ArrayList<String> removedPet = dataBase.remove(petID);
+
+        // Confirmation message
+        System.out.println(removedPet.get(0) + " " + removedPet.get(1) +
+         " has been removed from the database.");
     }
 }
