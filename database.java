@@ -20,7 +20,8 @@ import java.util.Scanner;
 
 public class database {
     // Static variable to track the next available ID
-    static int nextID = 6;
+    static int nextID = 0;
+    ;
 
     public static void main(String[] args) {
         // Creating Scanner object
@@ -32,15 +33,13 @@ public class database {
         // Using Hashmap as the database for fast performance and key-value pairs
         // Each key (id) will have a value of (Arraylist [name, age])
         // Want Array list to be name then age, so we know 0 = name & 1 = age
-        HashMap<Integer, ArrayList<String>> dataBase = new HashMap<>();
+        // HashMap<Integer, ArrayList<String>> dataBase = new HashMap<>();
+        
+        // Load database from file (or start with empty if file doesn't exist)
+        HashMap<Integer, ArrayList<String>> dataBase = fileHandler.loadDatabase();
 
-        // Test inputs for the database 
-        dataBase.put(1, new ArrayList<>(Arrays.asList("Max", "3")));
-        dataBase.put(2, new ArrayList<>(Arrays.asList("Luna", "5")));
-        dataBase.put(3, new ArrayList<>(Arrays.asList("Charlie", "2")));
-        dataBase.put(4, new ArrayList<>(Arrays.asList("Luna", "7")));
-        dataBase.put(5, new ArrayList<>(Arrays.asList("Cooper", "4")));
-
+        // Set nextID to be one more than the highest ID in the loaded database
+        nextID = fileHandler.getMaxID(dataBase) + 1;
         /* Create do-while loop to display database options until
         user selects exit */
         do{
@@ -73,7 +72,10 @@ public class database {
 
                 case 6 -> searchPetsByAge(dataBase, scanner);
 
-                case 7 -> System.out.println("Goodbye!");
+                case 7 -> {
+                    fileHandler.saveDatabase(dataBase);
+                    System.out.println("Goodbye!");
+                }
                 
                 default -> System.out.println("Invalid Choice! Enter Number between 1 & 7:");
             }
@@ -125,6 +127,13 @@ public class database {
             // Asking for users input on pets name
             System.out.print("Add pet (name, age): ");
             petName = scanner.next();
+
+            // Check if user typed done to exit loop
+            if (petName.equalsIgnoreCase("done")) {
+                break;
+            }
+
+            // Scanning for pet age if user didn't type done
             String petAge = scanner.next();
             
             // Check if user typed done to exit loop
