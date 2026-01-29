@@ -25,6 +25,7 @@ public class database {
     // Maximum number of pets allowed in database
     static final int MAX_PETS = 5;
 
+    @SuppressWarnings("ConvertToTryWithResources")
     public static void main(String[] args) {
         // Creating Scanner object
         Scanner scanner = new Scanner(System.in);
@@ -127,11 +128,11 @@ public class database {
         scanner.nextLine();
         
         // Loop to add multiple pets
-        String input = "";
+        String input;
         while (true) {
             // Check if database is full
             if (dataBase.size() >= MAX_PETS) {
-                System.out.println("Database is full! Maximum " + MAX_PETS + " pets allowed.");
+                System.out.println("Error: Database is full.");
                 break;
             }
             
@@ -148,7 +149,7 @@ public class database {
             String[] parts = input.split("\\s+");
             
             // Check if user provided both name and age
-            if (parts.length < 2) {
+            if (parts.length < 2 || parts.length > 2) {
                 System.out.println("Error: " + input + " is not a valid input.");
                 continue;
             }
@@ -257,6 +258,8 @@ public class database {
     /////////////////////////
     public static void updatePet(HashMap<Integer, ArrayList<String>> dataBase,
          Scanner scanner) {
+        // Display database for user to see options 
+        displayDataBase(dataBase);
 
         // Prompt user for pet ID to update
         System.out.print("Enter pet ID to update: ");
@@ -323,6 +326,9 @@ public class database {
     /////////////////////////
     public static void deletePet(HashMap<Integer, ArrayList<String>> dataBase,
          Scanner scanner) {
+
+        // Display database so user can see options
+        displayDataBase(dataBase);
         
         // Prompt user for pet ID to delete
         System.out.print("Enter pet ID to delete: ");
@@ -330,7 +336,7 @@ public class database {
 
         // Validate that the ID exists in the database
         if (!dataBase.containsKey(petID)) {
-            System.out.println("Error: ID " + petID + " does not exist in the database.");
+            System.out.println("Error: ID " + petID + " does not exist.");
             return;
         }
 
@@ -339,6 +345,6 @@ public class database {
 
         // Confirmation message
         System.out.println(removedPet.get(0) + " " + removedPet.get(1) +
-         " has been removed from the database.");
+         " is removed.");
     }
 }
