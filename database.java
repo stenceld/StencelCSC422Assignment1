@@ -9,7 +9,7 @@ Project: Assignment 1
 File Name: StencelCSC422Assignment1\database.java
 Sources: 
 Used for syntax help since I haven't used java in awhile
-https://www.w3schools.com/java/java_syntax.asp
+https://www.w3schools.com/java
  */
 
 // Imports
@@ -20,8 +20,12 @@ import java.util.Scanner;
 
 public class database {
     // Static variable to track the next available ID
-    static int nextID = 6;
+    static int nextID = 0;
+    
+    // Maximum number of pets allowed in database
+    static final int MAX_PETS = 5;
 
+    @SuppressWarnings("ConvertToTryWithResources")
     public static void main(String[] args) {
         // Creating Scanner object
         Scanner scanner = new Scanner(System.in);
@@ -32,15 +36,13 @@ public class database {
         // Using Hashmap as the database for fast performance and key-value pairs
         // Each key (id) will have a value of (Arraylist [name, age])
         // Want Array list to be name then age, so we know 0 = name & 1 = age
-        HashMap<Integer, ArrayList<String>> dataBase = new HashMap<>();
+        
+        // Load database from file (or start with empty if file doesn't exist)
+        HashMap<Integer, ArrayList<String>> dataBase = fileHandler.loadDatabase();
 
-        // Test inputs for the database 
-        dataBase.put(1, new ArrayList<>(Arrays.asList("Max", "3")));
-        dataBase.put(2, new ArrayList<>(Arrays.asList("Luna", "5")));
-        dataBase.put(3, new ArrayList<>(Arrays.asList("Charlie", "2")));
-        dataBase.put(4, new ArrayList<>(Arrays.asList("Luna", "7")));
-        dataBase.put(5, new ArrayList<>(Arrays.asList("Cooper", "4")));
-
+        // Set nextID to be one more than the highest ID in the loaded database
+        nextID = fileHandler.getMaxID(dataBase) + 1;
+        
         /* Create do-while loop to display database options until
         user selects exit */
         do{
@@ -73,11 +75,14 @@ public class database {
 
                 case 6 -> searchPetsByAge(dataBase, scanner);
 
-                case 7 -> System.out.println("Goodbye!");
+                case 7 -> {
+                    fileHandler.saveDatabase(dataBase);
+                    System.out.println("Goodbye!");
+                }
                 
                 default -> System.out.println("Invalid Choice! Enter Number between 1 & 7:");
             }
-                    }
+        }
         while (option != 7);
 
         // Closing scanner object
@@ -119,21 +124,56 @@ public class database {
         System.out.println("Enter pet information (name and age on each line).");
         System.out.println("Type 'done' when finished.");
         
+        // Clear any leftover input
+        scanner.nextLine();
+        
         // Loop to add multiple pets
-        String petName = "";
-        while (!petName.equalsIgnoreCase("done")) {
-            // Asking for users input on pets name
-            System.out.print("Add pet (name, age): ");
-            petName = scanner.next();
-            String petAge = scanner.next();
-            
-            // Check if user typed done to exit loop
-            if (petName.equalsIgnoreCase("done")) {
+        String input;
+        while (true) {
+            // Check if database is full
+            if (dataBase.size() >= MAX_PETS) {
+                System.out.println("Error: Database is full.");
                 break;
+            }
+            
+            // Asking for users input on pets name and age
+            System.out.print("Add pet (name, age): ");
+            input = scanner.nextLine().trim();
+
+            // Check if user typed done to exit loop
+            if (input.equalsIgnoreCase("done")) {
+                break;
+            }
+            
+            // Split input by spaces
+            String[] parts = input.split("\\s+");
+            
+            // Check if user provided both name and age
+            if (parts.length < 2 || parts.length > 2) {
+                System.out.println("Error: " + input + " is not a valid input.");
+                continue;
+            }
+            
+            String petName = parts[0];
+            String petAgeStr = parts[1];
+            
+            // Validate age is a number
+            int petAge;
+            try {
+                petAge = Integer.parseInt(petAgeStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: " + petAgeStr + " is not a valid age.");
+                continue;
+            }
+            
+            // Validate age is between 1 and 20
+            if (petAge < 1 || petAge > 20) {
+                System.out.println("Error: " + petAgeStr + " is not a valid age.");
+                continue;
             }
 
             // Adding pet to database
-            dataBase.put(nextID, new ArrayList<>(Arrays.asList(petName, petAge)));
+            dataBase.put(nextID, new ArrayList<>(Arrays.asList(petName, String.valueOf(petAge))));
             
             System.out.println("Pet added successfully!");
             
@@ -218,21 +258,60 @@ public class database {
     /////////////////////////
     public static void updatePet(HashMap<Integer, ArrayList<String>> dataBase,
          Scanner scanner) {
+        // Display database for user to see options 
+        displayDataBase(dataBase);
 
         // Prompt user for pet ID to update
         System.out.print("Enter pet ID to update: ");
         int petID = scanner.nextInt();
+        scanner.nextLine(); // Clear the newline
+        
+        // Validate that the ID exists in the database
+        if (!dataBase.containsKey(petID)) {
+            System.out.println("Error: ID " + petID + " does not exist in the database.");
+            System.out.println("=====================");
+            return;
+        }
         
         // Store existing pet info
         ArrayList<String> petInfo = dataBase.get(petID);
 
         // Prompt user for new name and age
         System.out.print("Enter new pet name and age: ");
-        String newName = scanner.next();
-        String newAge = scanner.next();
+        String input = scanner.nextLine().trim();
+        
+        // Split input by spaces
+        String[] parts = input.split("\\s+");
+        
+        // Check if user provided both name and age
+        if (parts.length < 2) {
+            System.out.println("Error: " + input + " is not a valid input.");
+            System.out.println("=====================");
+            return;
+        }
+        
+        String newName = parts[0];
+        String newAgeStr = parts[1];
+        
+        // Validate age is a number
+        int newAge;
+        try {
+            newAge = Integer.parseInt(newAgeStr);
+        } catch (NumberFormatException e) {
+            System.out.println("Error: " + newAgeStr + " is not a valid input.");
+            System.out.println("=====================");
+            return;
+        }
+        
+        // Validate age is between 1 and 20
+        if (newAge < 1 || newAge > 20) {
+            System.out.println("Error: Age must be between 1 and 20.");
+            System.out.println("=====================");
+            return;
+        }
 
         // Update the pet in the database
-        dataBase.put(petID, new ArrayList<>(Arrays.asList(newName, newAge)));
+        dataBase.put(petID, new ArrayList<>(Arrays.asList(newName, String.valueOf(newAge))));
 
         // Confirmation message
         System.out.println(petInfo.get(0) + " has been updated to "
@@ -247,16 +326,25 @@ public class database {
     /////////////////////////
     public static void deletePet(HashMap<Integer, ArrayList<String>> dataBase,
          Scanner scanner) {
+
+        // Display database so user can see options
+        displayDataBase(dataBase);
         
         // Prompt user for pet ID to delete
         System.out.print("Enter pet ID to delete: ");
         int petID = scanner.nextInt();
+
+        // Validate that the ID exists in the database
+        if (!dataBase.containsKey(petID)) {
+            System.out.println("Error: ID " + petID + " does not exist.");
+            return;
+        }
 
         // Remove the pet from the database
         ArrayList<String> removedPet = dataBase.remove(petID);
 
         // Confirmation message
         System.out.println(removedPet.get(0) + " " + removedPet.get(1) +
-         " has been removed from the database.");
+         " is removed.");
     }
 }
